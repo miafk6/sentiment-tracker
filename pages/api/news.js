@@ -1,9 +1,13 @@
 import axios from 'axios';
 
-const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
-
 export default async function handler(req, res) {
+  const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
   const { ticker = 'AAPL' } = req.query;
+
+  if (!FINNHUB_API_KEY) {
+    console.error('❌ Missing FINNHUB_API_KEY in environment variables');
+    return res.status(500).json({ error: 'API key missing' });
+  }
 
   try {
     const response = await axios.get(`https://finnhub.io/api/v1/company-news`, {
@@ -17,12 +21,12 @@ export default async function handler(req, res) {
 
     const news = response.data.map(item => ({
       ...item,
-      sentiment: 'Positive' // Can improve with real analysis later
+      sentiment: 'Positive' // placeholder
     }));
 
     res.status(200).json({ news });
   } catch (error) {
-    console.error('Finnhub News API Error:', error.message);
+    console.error('❌ Finnhub News API Error:', error.message);
     res.status(500).json({ error: 'Failed to fetch news' });
   }
 }
